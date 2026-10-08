@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Precio</title>
+  <style>
+    body  { font-family: Arial, sans-serif; text-align: center; margin: 0; padding: 32px 16px; color: #222; }
+    .desc { font-size: 28px; font-weight: bold; margin-bottom: 24px; }
+    .tit  { font-size: 20px; color: #555; margin-top: 20px; }
+    .val  { font-size: 36px; font-weight: bold; }
+  </style>
+</head>
+<body>
+  <div id="c"><div class="tit">Cargando precio…</div></div>
+
+  <script>
+    // URL /exec de la Web App (la misma que URL_WEBAPP en Codigo.gs)
+    var API = 'https://script.google.com/macros/s/AKfycbyi8GuWLJ5E1hLpExalbvq3zod7WOFFq_jfXDUVEW3A3hQ6urCdC_3UadfPytCzRc8h/exec';
+
+    var cont = document.getElementById('c');
+    var id = new URLSearchParams(location.search).get('id') || '';
+
+    function linea(clase, texto) {
+      var d = document.createElement('div');
+      d.className = clase;
+      d.textContent = texto;
+      cont.appendChild(d);
+    }
+
+    function mensaje(titulo, detalle) {
+      cont.innerHTML = '';
+      linea('desc', titulo);
+      if (detalle) linea('tit', detalle);
+    }
+
+    if (!id) {
+      mensaje('Prenda no encontrada', 'Consultá el precio en el local.');
+    } else {
+      // credentials: 'omit' → sin cookies de Google: no importa cuántas cuentas tenga el celular
+      fetch(API + '?json=1&id=' + encodeURIComponent(id), { credentials: 'omit' })
+        .then(function (r) { return r.json(); })
+        .then(function (d) {
+          if (!d || d.error) { mensaje('Prenda no encontrada', 'Consultá el precio en el local.'); return; }
+          cont.innerHTML = '';
+          document.title = d.descripcion;
+          linea('desc', d.descripcion);
+          linea('tit',  d.titulo1);
+          linea('val',  d.lista);
+          linea('tit',  d.titulo2);
+          linea('val',  d.codigo);
+        })
+        .catch(function () { mensaje('No se pudo cargar el precio', 'Probá de nuevo en unos segundos.'); });
+    }
+  </script>
+</body>
+</html>
