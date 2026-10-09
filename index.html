@@ -14,50 +14,101 @@
       --cafe:       #2E2522;   /* valores */
       --gris-cafe:  #9C8478;   /* pie */
       --linea:      #E4D7CC;
+      --alerta:     #A8452F;
       --serif: Georgia, "Times New Roman", serif;
       --sans:  Arial, Helvetica, sans-serif;
     }
     * { box-sizing: border-box; }
     html, body { margin: 0; background: var(--crema); color: var(--cafe); }
-    
-    main, footer { width: 100%; max-width: 560px; margin: 0 auto; }
+    main, footer, #venta { width: 100%; max-width: 560px; margin: 0 auto; }
 
     .titulo { background: var(--camel); color: #fff; font-family: var(--serif); font-weight: bold;
               font-size: clamp(30px, 9vw, 44px); line-height: 1.15; text-align: center;
               padding: 28px 16px 26px; margin: 0; }
-
     .etiqueta { background: var(--arena); color: var(--tostado); font-family: var(--sans); font-weight: bold;
                 font-size: 15px; letter-spacing: 0.04em; text-transform: uppercase;
                 padding: 12px 24px; border-top: 1px solid var(--linea); border-bottom: 1px solid var(--linea); }
-
     .valor { font-family: var(--serif); font-size: clamp(32px, 10vw, 44px); text-align: center;
              padding: 20px 16px 22px; }
+    .aviso { font-family: var(--sans); font-size: 17px; color: var(--gris-cafe); text-align: center; padding: 28px 16px; }
 
     footer { background: var(--arena); border-top: 1px solid var(--linea); text-align: center;
              padding: 14px 16px calc(14px + env(safe-area-inset-bottom)); font-family: var(--sans); font-size: 14px; }
     footer a { color: var(--gris-cafe); }
-    footer a:focus-visible { outline: 2px solid var(--tostado); outline-offset: 3px; }
 
-    .aviso { font-family: var(--sans); font-size: 17px; color: var(--gris-cafe); text-align: center; padding: 28px 16px; }
-    .cargando .titulo { opacity: 0.85; }
+    /* ===== Modo vendedora ===== */
+    #venta { font-family: var(--sans); font-size: 16px; }
+    #venta[hidden] { display: none; }
+    .panel { background: #fff; border-top: 3px solid var(--camel); padding: 16px; }
+    .panel h2 { font-family: var(--sans); font-size: 13px; letter-spacing: 0.06em; text-transform: uppercase;
+                color: var(--tostado); margin: 0 0 12px; }
+    .stock { margin-bottom: 12px; }
+    .stock.lleno { color: var(--alerta); font-weight: bold; }
+    .btn { display: block; width: 100%; border: 0; border-radius: 6px; padding: 13px 16px; margin-top: 10px;
+           font-family: var(--sans); font-size: 16px; font-weight: bold; cursor: pointer;
+           background: var(--camel); color: #fff; }
+    .btn.sec { background: var(--arena); color: var(--tostado); }
+    .btn:disabled { opacity: 0.5; }
+    .item { display: flex; align-items: center; gap: 8px; padding: 9px 0; border-bottom: 1px solid var(--linea); }
+    .item .nom { flex: 1; }
+    .item .pre { font-family: var(--serif); white-space: nowrap; }
+    .quitar { border: 0; background: none; color: var(--gris-cafe); font-size: 22px; line-height: 1; padding: 0 4px; cursor: pointer; }
+    .total { display: flex; justify-content: space-between; padding: 10px 0 2px; font-weight: bold; }
+    .total .pre { font-family: var(--serif); font-size: 20px; }
+    .pago { display: flex; gap: 8px; margin-top: 10px; }
+    .pago select, .pago input, .pin input { font-size: 16px; padding: 10px; border: 1px solid var(--linea); border-radius: 6px;
+                                            background: var(--crema); color: var(--cafe); }
+    .pago select { flex: 1.3; min-width: 0; }
+    .pago input  { flex: 1; min-width: 0; text-align: right; }
+    .precios { display: flex; gap: 8px; margin-bottom: 12px; }
+    .precios div { flex: 1; background: var(--crema); border: 1px solid var(--linea); border-radius: 6px; padding: 8px; text-align: center; }
+    .precios small { display: block; font-size: 12px; color: var(--tostado); text-transform: uppercase; letter-spacing: 0.04em; }
+    .precios b { font-family: var(--serif); font-weight: normal; font-size: 22px; }
+    .item .dto { color: var(--gris-cafe); font-size: 14px; }
+    .dif { font-size: 14px; color: var(--gris-cafe); margin-top: 6px; text-align: right; }
+    .ok  { color: #3F6B3A; font-weight: bold; }
+    .err { color: var(--alerta); font-weight: bold; margin-top: 10px; }
+    .salir { display: block; text-align: center; margin: 14px 0 4px; font-size: 13px; color: var(--gris-cafe); }
+    .pin { padding: 24px 16px; text-align: center; font-family: var(--sans); }
+    .pin input { width: 100%; text-align: center; letter-spacing: 0.3em; margin-top: 12px; }
   </style>
 </head>
 <body>
-  <main id="c" class="cargando">
-    <h1 class="titulo">Poly</h1>
-    <div class="aviso">Cargando precio…</div>
-  </main>
+  <main id="c"><h1 class="titulo">Poly</h1><div class="aviso">Cargando precio…</div></main>
+  <section id="venta" hidden></section>
   <footer>
-    <!-- Link del pie: reemplazá el href por el que tenías en el original si es otro -->
-    <a href="https://www.instagram.com/poly.sf/" target="_blank" rel="noopener">@poly.sf &nbsp;·&nbsp; BV Pellegrini 2998</a>
+<!--    <a href="https://www.instagram.com/poly.sf/" target="_blank" rel="noopener">@poly.sf &nbsp;·&nbsp; BV Pellegrini 2998</a>-->
+    <a href="https://taplink.cc/poly.sf" target="_blank" rel="noopener">@poly.sf &nbsp;·&nbsp; BV Pellegrini 2998</a>
   </footer>
 
   <script>
     // URL /exec de la Web App (la misma que URL_WEBAPP en Codigo.gs)
     var API = 'https://script.google.com/macros/s/AKfycbyi8GuWLJ5E1hLpExalbvq3zod7WOFFq_jfXDUVEW3A3hQ6urCdC_3UadfPytCzRc8h/exec';
 
+    var K_PIN = 'poly_pin', K_VENTA = 'poly_venta';
+    var params = new URLSearchParams(location.search);
+    var id  = (params.get('id') || '').trim();
+    var pin = leer(K_PIN);
     var cont = document.getElementById('c');
-    var id = new URLSearchParams(location.search).get('id') || '';
+    var zona = document.getElementById('venta');
+
+    var prenda = null;     // prenda escaneada (modo vendedora)
+    var cobrando = false;  // pantalla de cobro abierta
+    var medios = [];       // medios de pago activos
+    var pagos = [];        // [{medio, monto}]
+    var resultado = '';    // mensaje después de confirmar
+    var resultadoErr = false;
+
+    // ---------- utilidades ----------
+    function leer(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
+    function guardar(k, v) { try { v === null ? localStorage.removeItem(k) : localStorage.setItem(k, v); } catch (e) {} }
+    function carrito() { try { return JSON.parse(leer(K_VENTA)) || []; } catch (e) { return []; } }
+    function guardarCarrito(c) { guardar(K_VENTA, JSON.stringify(c)); }
+    function pesos(n) { return '$' + Math.round(n || 0).toLocaleString('es-AR'); }
+    function numero(txt) { return Number(String(txt).replace(/[^\d,]/g, '').replace(',', '.')) || 0; }
+    function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+    function getJSON(qs) { return fetch(API + '?' + qs, { credentials: 'omit' }).then(function (r) { return r.json(); }); }
 
     function agregar(tag, clase, texto) {
       var el = document.createElement(tag);
@@ -65,30 +116,196 @@
       el.textContent = texto;
       cont.appendChild(el);
     }
-
     function mensaje(titulo, detalle) {
-      cont.className = '';
       cont.innerHTML = '';
       agregar('h1', 'titulo', titulo);
       agregar('div', 'aviso', detalle);
     }
 
-    if (!id) {
-      mensaje('Poly', 'Escaneá el código de la etiqueta para ver el precio.');
+    // ---------- página pública ----------
+    function mostrarPrenda(d) {
+      cont.innerHTML = '';
+      document.title = d.descripcion + ' · Poly';
+      agregar('h1',  'titulo',   d.descripcion);
+      agregar('div', 'etiqueta', d.titulo1);
+      agregar('div', 'valor',    d.lista);
+      agregar('div', 'etiqueta', d.titulo2);
+      agregar('div', 'valor',    d.codigo);
+    }
+
+    // ---------- activar modo vendedora ----------
+    function pantallaActivar() {
+      cont.innerHTML = '<h1 class="titulo">Modo vendedora</h1>'
+        + '<div class="pin">Ingresá el PIN para activar este celular.'
+        + '<input id="pin" type="password" inputmode="numeric" autocomplete="off">'
+        + '<button class="btn" id="activar">Activar</button><div id="pinmsg"></div></div>';
+      document.getElementById('activar').onclick = function () {
+        var valor = document.getElementById('pin').value.trim();
+        var msg = document.getElementById('pinmsg');
+        msg.className = ''; msg.textContent = 'Verificando…';
+        getJSON('accion=verificar&pin=' + encodeURIComponent(valor)).then(function (r) {
+          if (r.ok) { guardar(K_PIN, valor); location.replace(location.pathname); }
+          else { msg.className = 'err'; msg.textContent = 'PIN incorrecto.'; }
+        }).catch(function () { msg.className = 'err'; msg.textContent = 'Sin conexión. Probá de nuevo.'; });
+      };
+    }
+
+    // ---------- panel de venta ----------
+    function render() {
+      if (!pin) { zona.hidden = true; return; }
+      zona.hidden = false;
+      var c = carrito();
+      var ref = c.reduce(function (s, x) { return s + x.listaNum; }, 0);
+      var dto = c.reduce(function (s, x) { return s + (x.dtoNum || 0); }, 0);
+      var h = '';
+
+      if (resultado) h += '<div class="panel"><div class="' + (resultadoErr ? 'err' : 'ok') + '">' + esc(resultado) + '</div></div>';
+
+      if (prenda && !cobrando) {
+        var enVenta = c.filter(function (x) { return x.id === prenda.id; }).length;
+        var ocupadas = prenda.vendidas + enVenta;
+        var lleno = ocupadas >= prenda.cant;
+        h += '<div class="panel"><h2>Esta prenda</h2>'
+           + '<div class="precios"><div><small>Lista</small><b>' + pesos(prenda.listaNum) + '</b></div>'
+           + '<div><small>Con descuento</small><b>' + pesos(prenda.dtoNum) + '</b></div></div>'
+           + '<div class="stock' + (lleno ? ' lleno' : '') + '">Vendidas: ' + prenda.vendidas + ' de ' + prenda.cant
+           + (enVenta ? ' · en esta venta: ' + enVenta : '')
+           + (lleno ? '<br>Figuran todas vendidas. Revisá antes de agregar.' : '') + '</div>'
+           + '<button class="btn" data-acc="agregar">Agregar a la venta</button></div>';
+      }
+
+      h += '<div class="panel"><h2>Venta en curso</h2>';
+      if (c.length === 0) {
+        h += '<div class="aviso" style="padding:8px 0">Escaneá una prenda para empezar.</div>';
+      } else {
+        c.forEach(function (x, i) {
+          h += '<div class="item"><span class="nom">' + esc(x.desc) + '</span><span class="pre">' + pesos(x.listaNum) + ' <span class="dto">/ ' + pesos(x.dtoNum) + '</span></span>'
+             + (cobrando ? '' : '<button class="quitar" data-acc="quitar" data-i="' + i + '" aria-label="Quitar">×</button>') + '</div>';
+        });
+        h += '<div class="total"><span>Total de lista</span><span class="pre">' + pesos(ref) + '</span></div>'
+           + '<div class="total"><span>Total con descuento</span><span class="pre">' + pesos(dto) + '</span></div>';
+
+        if (!cobrando) {
+          h += '<button class="btn" data-acc="cobrar">Cobrar</button>'
+             + '<button class="btn sec" data-acc="vaciar">Vaciar venta</button>';
+        } else {
+          h += '<h2 style="margin-top:18px">Pagos</h2>'
+             + '<div class="pago"><button class="btn sec" style="margin:0" data-acc="usarLista">Total de lista</button>'
+             + '<button class="btn sec" style="margin:0" data-acc="usarDto">Con descuento</button></div>';
+          pagos.forEach(function (p, i) {
+            h += '<div class="pago"><select data-i="' + i + '">'
+               + medios.map(function (m) { return '<option' + (m === p.medio ? ' selected' : '') + '>' + esc(m) + '</option>'; }).join('')
+               + '</select><input data-i="' + i + '" inputmode="numeric" value="' + (p.monto ? Math.round(p.monto) : '') + '" placeholder="Monto">'
+               + (pagos.length > 1 ? '<button class="quitar" data-acc="quitarPago" data-i="' + i + '" aria-label="Quitar pago">×</button>' : '')
+               + '</div>';
+          });
+          h += '<div class="dif" id="dif"></div>'
+             + '<button class="btn sec" data-acc="otroPago">+ Otro medio de pago</button>'
+             + '<button class="btn" data-acc="confirmar" id="confirmar">Confirmar venta</button>'
+             + '<button class="btn sec" data-acc="volver">Volver</button>'
+             + '<div id="cobromsg"></div>';
+        }
+      }
+      h += '<a href="#" class="salir" data-acc="salir">Salir del modo vendedora</a></div>';
+      zona.innerHTML = h;
+      if (cobrando) actualizarDiferencia();
+    }
+
+    function actualizarDiferencia() {
+      var ref = carrito().reduce(function (s, x) { return s + x.listaNum; }, 0);
+      var cobrado = pagos.reduce(function (s, p) { return s + (p.monto || 0); }, 0);
+      var dif = cobrado - ref;
+      document.getElementById('dif').textContent = 'Total cobrado: ' + pesos(cobrado)
+        + (Math.round(dif) === 0 ? '' : ' (' + (dif < 0 ? 'descuento de ' + pesos(-dif) : 'recargo de ' + pesos(dif)) + ')');
+    }
+
+    // Edición de pagos sin redibujar (no pierde el foco del teclado)
+    zona.addEventListener('input', function (ev) {
+      var i = ev.target.getAttribute('data-i');
+      if (i === null) return;
+      if (ev.target.tagName === 'INPUT')  pagos[i].monto = numero(ev.target.value);
+      if (ev.target.tagName === 'SELECT') pagos[i].medio = ev.target.value;
+      actualizarDiferencia();
+    });
+
+    zona.addEventListener('click', function (ev) {
+      var b = ev.target.closest('[data-acc]');
+      if (!b) return;
+      var acc = b.getAttribute('data-acc'), i = Number(b.getAttribute('data-i'));
+      var c = carrito();
+      resultado = ''; resultadoErr = false;
+
+      if (acc === 'agregar') {
+        c.push({ id: prenda.id, desc: prenda.descripcion, listaNum: prenda.listaNum, dtoNum: prenda.dtoNum });
+        guardarCarrito(c);
+        prenda = null;   // agregada: el panel de la prenda se cierra
+      }
+      if (acc === 'quitar') { c.splice(i, 1); guardarCarrito(c); }
+      if (acc === 'vaciar' && confirm('¿Vaciar la venta en curso?')) guardarCarrito([]);
+      if (acc === 'volver') cobrando = false;
+      if (acc === 'quitarPago') pagos.splice(i, 1);
+      if (acc === 'usarLista' || acc === 'usarDto') {
+        var campo = acc === 'usarLista' ? 'listaNum' : 'dtoNum';
+        var tot = c.reduce(function (s, x) { return s + (x[campo] || 0); }, 0);
+        pagos = [{ medio: (pagos[0] && pagos[0].medio) || medios[0], monto: tot }];
+      }
+      if (acc === 'otroPago') {
+        var resto = c.reduce(function (s, x) { return s + x.listaNum; }, 0)
+                  - pagos.reduce(function (s, p) { return s + (p.monto || 0); }, 0);
+        pagos.push({ medio: medios[0], monto: resto > 0 ? resto : 0 });
+      }
+      if (acc === 'salir') {
+        ev.preventDefault();
+        if (!confirm('¿Desactivar el modo vendedora en este celular?')) return;
+        guardar(K_PIN, null); guardarCarrito([]); location.replace(location.pathname + location.search);
+        return;
+      }
+      if (acc === 'cobrar') {
+        b.disabled = true; b.textContent = 'Cargando medios de pago…';
+        getJSON('accion=medios&pin=' + encodeURIComponent(pin)).then(function (r) {
+          if (r.error) throw new Error(r.error);
+          medios = r.medios || [];
+          var ref = c.reduce(function (s, x) { return s + x.listaNum; }, 0);
+          pagos = [{ medio: medios[0], monto: ref }];
+          cobrando = true;
+          render();
+        }).catch(function (e) { b.disabled = false; b.textContent = 'Cobrar'; alert('No se pudo cargar: ' + e.message); });
+        return;
+      }
+      if (acc === 'confirmar') {
+        var msg = document.getElementById('cobromsg');
+        if (pagos.some(function (p) { return !(p.monto > 0); })) { msg.className = 'err'; msg.textContent = 'Hay un pago sin monto.'; return; }
+        b.disabled = true; b.textContent = 'Registrando…';
+        fetch(API, { method: 'POST', credentials: 'omit',
+                     body: JSON.stringify({ pin: pin, prendas: c.map(function (x) { return x.id; }), pagos: pagos }) })
+          .then(function (r) { return r.json(); })
+          .then(function (r) {
+            if (r.error) throw new Error(r.error);
+            guardarCarrito([]); cobrando = false; pagos = [];
+            resultado = 'Venta registrada: ' + pesos(r.total) + '. ¡Listo!';
+            render();
+          })
+          .catch(function (e) { b.disabled = false; b.textContent = 'Confirmar venta'; msg.className = 'err'; msg.textContent = e.message; });
+        return;
+      }
+      render();
+    });
+
+    // ---------- arranque ----------
+    if (params.get('vendedora')) {
+      pantallaActivar();
+    } else if (!id) {
+      if (pin) mensaje('Poly', 'Modo vendedora activo.');
+      else mensaje('Poly', 'Escaneá el código de la etiqueta para ver el precio.');
+      render();
     } else {
-      // credentials: 'omit' → sin cookies de Google: no importa cuántas cuentas tenga el celular
-      fetch(API + '?json=1&id=' + encodeURIComponent(id), { credentials: 'omit' })
-        .then(function (r) { return r.json(); })
+      getJSON('json=1&id=' + encodeURIComponent(id) + (pin ? '&pin=' + encodeURIComponent(pin) : ''))
         .then(function (d) {
-          if (!d || d.error) { mensaje('Poly', 'No encontramos esta prenda. Consultá el precio en el local.'); return; }
-          cont.className = '';
-          cont.innerHTML = '';
-          document.title = d.descripcion + ' · Poly';
-          agregar('h1',  'titulo',   d.descripcion);
-          agregar('div', 'etiqueta', d.titulo1);
-          agregar('div', 'valor',    d.lista);
-          agregar('div', 'etiqueta', d.titulo2);
-          agregar('div', 'valor',    d.codigo);
+          if (!d || d.error) { mensaje('Poly', 'No encontramos esta prenda. Consultá el precio en el local.'); render(); return; }
+          mostrarPrenda(d);
+          if (pin && d.cant !== undefined) prenda = d;
+          else if (pin) resultadoErr = true, resultado = 'El PIN de este celular ya no es válido: tocá "Salir del modo vendedora" y activalo de nuevo.';
+          render();
         })
         .catch(function () { mensaje('Poly', 'No se pudo cargar el precio. Probá de nuevo en unos segundos.'); });
     }
