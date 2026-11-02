@@ -68,6 +68,13 @@
     .dif { font-size: 14px; color: var(--gris-cafe); margin-top: 6px; text-align: right; }
     .ok  { color: #3F6B3A; font-weight: bold; }
     .err { color: var(--alerta); font-weight: bold; margin-top: 10px; }
+    .fact { display: flex; align-items: center; gap: 10px; margin-top: 14px; font-weight: bold; }
+    .fact input { width: 22px; height: 22px; accent-color: var(--camel); }
+    .manual { font-family: var(--sans); background: #fff; padding: 16px; }
+    .manual label { display: block; margin-top: 12px; font-size: 14px; font-weight: bold; color: var(--tostado); }
+    .manual label small { font-weight: normal; color: var(--gris-cafe); }
+    .manual input { display: block; width: 100%; margin-top: 6px; font-size: 18px; padding: 10px; border: 1px solid var(--linea);
+                    border-radius: 6px; background: var(--crema); color: var(--cafe); }
     .salir { display: block; text-align: center; margin: 14px 0 4px; font-size: 13px; color: var(--gris-cafe); }
     .pin { padding: 24px 16px; text-align: center; font-family: var(--sans); }
     .pin input { width: 100%; text-align: center; letter-spacing: 0.3em; margin-top: 12px; }
@@ -77,13 +84,12 @@
   <main id="c"><h1 class="titulo">Poly</h1><div class="aviso">Cargando precio…</div></main>
   <section id="venta" hidden></section>
   <footer>
-<!--    <a href="https://www.instagram.com/poly.sf/" target="_blank" rel="noopener">@poly.sf &nbsp;·&nbsp; BV Pellegrini 2998</a>-->
-    <a href="https://taplink.cc/poly.sf" target="_blank" rel="noopener">@poly.sf &nbsp;·&nbsp; BV Pellegrini 2998</a>
+    <a href="https://www.instagram.com/poly.sf/" target="_blank" rel="noopener">@poly.sf &nbsp;·&nbsp; BV Pellegrini 2998</a>
   </footer>
 
   <script>
     // URL /exec de la Web App (la misma que URL_WEBAPP en Codigo.gs)
-    var API = 'https://script.google.com/macros/s/AKfycbyi8GuWLJ5E1hLpExalbvq3zod7WOFFq_jfXDUVEW3A3hQ6urCdC_3UadfPytCzRc8h/exec';
+    var API = 'PEGAR_ACA_LA_URL_EXEC';
 
     var K_PIN = 'poly_pin', K_VENTA = 'poly_venta';
     var params = new URLSearchParams(location.search);
@@ -98,6 +104,8 @@
     var pagos = [];        // [{medio, monto}]
     var resultado = '';    // mensaje después de confirmar
     var resultadoErr = false;
+    var FACTURAR_POR_DEFECTO = true;   // cómo arranca la casilla "Facturar esta venta"
+    var facturar = FACTURAR_POR_DEFECTO;
 
     // ---------- utilidades ----------
     function leer(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
@@ -131,6 +139,32 @@
       agregar('div', 'valor',    d.lista);
       agregar('div', 'etiqueta', d.titulo2);
       agregar('div', 'valor',    d.codigo);
+    }
+
+    // ---------- QR de mostrador: ítem sin etiqueta ----------
+    function pantallaMostrador() {
+      cont.innerHTML = '<h1 class="titulo">Venta sin etiqueta</h1>'
+        + '<div class="manual">'
+        + '<label>Descripción<input id="mDesc" maxlength="100" placeholder="Ej: aros dorados"></label>'
+        + '<label>Precio de lista<input id="mLista" inputmode="numeric" placeholder="$"></label>'
+        + '<label>Precio con descuento <small>(opcional)</small><input id="mDto" inputmode="numeric" placeholder="Igual al de lista"></label>'
+        + '<button class="btn" id="mAgregar">Agregar a la venta</button><div id="mMsg"></div></div>';
+      document.getElementById('mAgregar').onclick = function () {
+        var d = document.getElementById('mDesc'), l = document.getElementById('mLista'), t = document.getElementById('mDto');
+        var msg = document.getElementById('mMsg');
+        var desc = d.value.trim(), lista = numero(l.value), dto = numero(t.value) || lista;
+        msg.className = 'err';
+        if (!desc)          { msg.textContent = 'Escribí una descripción.'; return; }
+        if (!(lista > 0))   { msg.textContent = 'Falta el precio de lista.'; return; }
+        if (dto > lista)    { msg.textContent = 'El precio con descuento no puede ser mayor al de lista.'; return; }
+        var c = carrito();
+        c.push({ id: 'MANUAL', desc: desc, listaNum: lista, dtoNum: dto, manual: true });
+        guardarCarrito(c);
+        d.value = ''; l.value = ''; t.value = '';
+        msg.className = 'ok'; msg.textContent = 'Agregado: ' + desc;
+        resultado = ''; resultadoErr = false;
+        render();
+      };
     }
 
     // ---------- activar modo vendedora ----------
@@ -201,6 +235,7 @@
           });
           h += '<div class="dif" id="dif"></div>'
              + '<button class="btn sec" data-acc="otroPago">+ Otro medio de pago</button>'
+             + '<label class="fact"><input type="checkbox" id="facturar"' + (facturar ? ' checked' : '') + '> Facturar esta venta</label>'
              + '<button class="btn" data-acc="confirmar" id="confirmar">Confirmar venta</button>'
              + '<button class="btn sec" data-acc="volver">Volver</button>'
              + '<div id="cobromsg"></div>';
@@ -220,6 +255,10 @@
     }
 
     // Edición de pagos sin redibujar (no pierde el foco del teclado)
+    zona.addEventListener('change', function (ev) {
+      if (ev.target.id === 'facturar') facturar = ev.target.checked;
+    });
+
     zona.addEventListener('input', function (ev) {
       var i = ev.target.getAttribute('data-i');
       if (i === null) return;
@@ -277,12 +316,14 @@
         if (pagos.some(function (p) { return !(p.monto > 0); })) { msg.className = 'err'; msg.textContent = 'Hay un pago sin monto.'; return; }
         b.disabled = true; b.textContent = 'Registrando…';
         fetch(API, { method: 'POST', credentials: 'omit',
-                     body: JSON.stringify({ pin: pin, prendas: c.map(function (x) { return x.id; }), pagos: pagos }) })
+                     body: JSON.stringify({ pin: pin, pagos: pagos, facturar: facturar,
+                       prendas: c.map(function (x) { return x.manual ? { id: 'MANUAL', desc: x.desc, lista: x.listaNum, dto: x.dtoNum } : x.id; }) }) })
           .then(function (r) { return r.json(); })
           .then(function (r) {
             if (r.error) throw new Error(r.error);
             guardarCarrito([]); cobrando = false; pagos = [];
-            resultado = 'Venta registrada: ' + pesos(r.total) + '. ¡Listo!';
+            resultado = 'Venta registrada: ' + pesos(r.total) + (facturar ? ' (a facturar)' : ' (sin factura)') + '. ¡Listo!';
+            facturar = FACTURAR_POR_DEFECTO;
             render();
           })
           .catch(function (e) { b.disabled = false; b.textContent = 'Confirmar venta'; msg.className = 'err'; msg.textContent = e.message; });
@@ -294,6 +335,9 @@
     // ---------- arranque ----------
     if (params.get('vendedora')) {
       pantallaActivar();
+    } else if (id.toUpperCase() === 'MOSTRADOR') {
+      if (pin) { pantallaMostrador(); render(); }
+      else mensaje('Poly', 'Escaneá el código de la etiqueta de la prenda para ver el precio.');
     } else if (!id) {
       if (pin) mensaje('Poly', 'Modo vendedora activo.');
       else mensaje('Poly', 'Escaneá el código de la etiqueta para ver el precio.');
